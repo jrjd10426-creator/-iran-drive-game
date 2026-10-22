@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>راننده ایرانی - نمونه ۰٫۱</title>
+<style>
+*{box-sizing:border-box}html,body,#game{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;color:white;font-family:system-ui,sans-serif}canvas{display:block}#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;pointer-events:none;gap:8px}.panel{background:#101820d9;padding:9px 12px;border-radius:12px;font-size:12px;border:1px solid #ffffff2b}#speed{font-size:22px;font-weight:bold;direction:ltr}#garage{position:fixed;right:10px;top:74px;background:#101820e8;padding:10px;border-radius:12px;width:145px;font-size:12px}#garage p{margin:4px 0 8px;color:#ccd5da}.swatches{display:flex;gap:6px;flex-wrap:wrap}.swatch{width:25px;height:25px;border:2px solid #fff9;border-radius:50%}#reset{margin-top:8px;width:100%;padding:7px;border:0;border-radius:7px;background:#315064;color:white}#controls{position:fixed;bottom:22px;left:0;right:0;display:flex;justify-content:space-between;padding:0 15px;align-items:end;pointer-events:none}.cluster{display:flex;gap:9px;pointer-events:auto}.ctrl{width:58px;height:58px;border-radius:50%;border:1px solid #ffffff66;background:#193044e8;color:white;font-weight:bold;touch-action:none}.ctrl.gas{background:#a8532b;width:68px;height:68px}.ctrl:active,.ctrl.down{background:#d67a44}#status{position:fixed;bottom:4px;left:8px;right:8px;text-align:center;font-size:10px;color:#d8e1e5;text-shadow:0 1px 3px black;pointer-events:none}#loading{position:fixed;z-index:5;inset:0;display:grid;place-items:center;text-align:center;padding:25px;background:#101820}#loading small{display:block;line-height:1.8;color:#c5d0d7;max-width:330px}.hide{display:none}@media(max-height:500px){#controls{bottom:8px}.ctrl{width:48px;height:48px}.ctrl.gas{width:56px;height:56px}}
+</style></head><body>
+<div id="game"></div><div id="loading"><div><h2>راننده ایرانی</h2><p>در حال بارگیری صحنه سه‌بعدی…</p><small>این نمونه برای اجرای Three.js به اینترنت نیاز دارد. امکانات نمایش‌داده‌شده آزمایشی‌اند.</small></div></div>
+<div id="hud"><div class="panel">سرعت نمایشی<div id="speed">0 <small>km/h*</small></div></div><div class="panel">نمونه ۰٫۱<br>گاز را نگه دار و فرمان بده</div></div>
+<div id="garage"><b>گاراژ آزمایشی</b><p>تغییر رنگ بدنه</p><div class="swatches"><button class="swatch" data-color="#e8ecef" style="background:#e8ecef"></button><button class="swatch" data-color="#c73c32" style="background:#c73c32"></button><button class="swatch" data-color="#2368a0" style="background:#2368a0"></button><button class="swatch" data-color="#397451" style="background:#397451"></button><button class="swatch" data-color="#d7ad31" style="background:#d7ad31"></button></div><button id="reset">شروع دوباره</button></div>
+<div id="controls"><div class="cluster"><button class="ctrl" data-action="left">◀</button><button class="ctrl" data-action="right">▶</button></div><div class="cluster"><button class="ctrl" data-action="brake">ترمز</button><button class="ctrl gas" data-action="gas">گاز</button></div></div>
+<div id="status">*عدد سرعت و حرکت، فیزیک واقعی خودرو نیستند.</div>
+<script type="module">
+const status=document.querySelector('#status'),loading=document.querySelector('#loading');
+try{
+const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9eb7c7);scene.fog=new THREE.Fog(0x9eb7c7,70,250);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,600);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.querySelector('#game').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdcecff,0x5a5143,2));const sun=new THREE.DirectionalLight(0xfff0d4,2);sun.position.set(-35,65,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+const mat=(c,r=.8)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(500,500),mat(0x8b927e));ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;scene.add(ground);
+const road=new THREE.Mesh(new THREE.PlaneGeometry(15,420),mat(0x353b40));road.rotation.x=-Math.PI/2;road.position.set(0,-.05,-80);road.receiveShadow=true;scene.add(road);
+for(let z=125;z>-285;z-=12){let m=new THREE.Mesh(new THREE.BoxGeometry(.16,.025,5),mat(0xe6d9a4));m.position.set(0,.01,z);scene.add(m)}
+for(let x of [-8.1,8.1]){let w=new THREE.Mesh(new THREE.BoxGeometry(1.1,.22,420),mat(0xb7b5a8));w.position.set(x,-.01,-80);scene.add(w)}
+for(let i=0;i<18;i++){let h=12+Math.random()*25,m=new THREE.Mesh(new THREE.ConeGeometry(15+Math.random()*15,h,5),mat([0x777f76,0x858b7c,0x9b9b89][i%3]));m.position.set((i%2?1:-1)*(25+Math.random()*55),h/2-1,-150-Math.random()*100);scene.add(m)}
+const bm=[mat(0xc5b49a),mat(0xb6a58e),mat(0xd2c5ad),mat(0x9b9b91)];
+for(let side of [-1,1])for(let i=0;i<23;i++){let z=110-i*15,w=5+Math.random()*6,h=5+Math.random()*15,d=7+Math.random()*5;let b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),bm[i%bm.length]);b.position.set(side*(13+w/2+Math.random()*3),h/2,z);b.castShadow=true;b.receiveShadow=true;scene.add(b);for(let f=1;f<Math.min(4,Math.floor(h/3));f++)for(let j=0;j<Math.max(1,Math.floor(w/3));j++){let win=new THREE.Mesh(new THREE.BoxGeometry(.7,1,.08),mat(0x50626b,.4));win.position.set(b.position.x-side*(w/2+.05),f*2.3,z-w/2+d*.2+j*2);scene.add(win)}}
+for(let z=110;z>-250;z-=24)for(let side of [-1,1]){let pole=new THREE.Mesh(new THREE.CylinderGeometry(.08,.11,5,6),mat(0x575a59));pole.position.set(side*9,2.5,z);scene.add(pole)}
+const car=new THREE.Group();scene.add(car);const bodyMat=new THREE.MeshStandardMaterial({color:0xe8ecef,metalness:.2,roughness:.4});
+function box(parent,geo,material,x,y,z){let o=new THREE.Mesh(geo,material);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
+box(car,new THREE.BoxGeometry(1.85,.58,4.1),bodyMat,0,.85,0);box(car,new THREE.BoxGeometry(1.72,.2,1.05),bodyMat,0,1.17,-1.25);box(car,new THREE.BoxGeometry(1.45,.65,1.8),mat(0x27343c,.35),0,1.42,.05);box(car,new THREE.BoxGeometry(1.38,.12,1.48),bodyMat,0,1.79,.08);
+box(car,new THREE.BoxGeometry(1.25,.42,.05),mat(0x7795a3,.3),0,1.48,-.88).rotation.x=-.25;
+const wheels=[];for(let x of [-.98,.98])for(let z of [-1.28,1.28]){let w=box(car,new THREE.CylinderGeometry(.38,.38,.22,14),mat(0x202326),x,.42,z);w.rotation.z=Math.PI/2;wheels.push(w);let hub=box(car,new THREE.CylinderGeometry(.16,.16,.235,10),mat(0x9fa7aa,.4),x*1.01,.42,z);hub.rotation.z=Math.PI/2}
+for(let x of [-.62,.62]){box(car,new THREE.BoxGeometry(.36,.16,.06),mat(0xfff0bd),x,.96,-2.08);box(car,new THREE.BoxGeometry(.32,.17,.06),mat(0x9c2624),x,.96,2.08)}
+car.position.set(0,0,5);
+const s={speed:0,heading:0,gas:false,brake:false,left:false,right:false},clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+document.querySelectorAll('[data-action]').forEach(btn=>{let k=btn.dataset.action;const on=e=>{e.preventDefault();s[k]=true;btn.classList.add('down')},off=e=>{e.preventDefault();s[k]=false;btn.classList.remove('down')};btn.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(n=>btn.addEventListener(n,off))});
+document.querySelectorAll('[data-color]').forEach(b=>b.addEventListener('click',()=>bodyMat.color.set(b.dataset.color)));
+document.querySelector('#reset').addEventListener('click',()=>{car.position.set(0,0,5);s.speed=0;s.heading=0;car.rotation.y=0});
+let last=performance.now();function frame(now){requestAnimationFrame(frame);let dt=Math.min((now-last)/1000,.04);last=now;
+if(s.gas)s.speed=Math.min(20,s.speed+8*dt);else s.speed=Math.max(0,s.speed-2*dt);if(s.brake)s.speed=Math.max(0,s.speed-16*dt);
+if(s.left&&s.speed>.3)s.heading+=1.2*dt*(s.speed/10);if(s.right&&s.speed>.3)s.heading-=1.2*dt*(s.speed/10);
+car.rotation.y=s.heading;car.position.x=clamp(car.position.x+Math.sin(s.heading)*s.speed*dt,-5.3,5.3);car.position.z-=Math.cos(s.heading)*s.speed*dt;wheels.forEach(w=>w.rotation.x+=s.speed*dt*1.5);
+let forward=new THREE.Vector3(Math.sin(s.heading),0,-Math.cos(s.heading));let desired=car.position.clone().add(new THREE.Vector3(0,4,0)).addScaledVector(forward,-9);camera.position.lerp(desired,1-Math.exp(-4*dt));let look=car.position.clone().addScaledVector(forward,4);look.y+=1;camera.lookAt(look);document.querySelector('#speed').innerHTML=Math.round(s.speed*3.6)+' <small>km/h*</small>';renderer.render(scene,camera)}
+requestAnimationFrame(frame);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5))});
+loading.classList.add('hide');status.textContent='صحنه سه‌بعدی بارگیری شد. حرکت و سرعت آزمایشی‌اند؛ فیزیک واقعی خودرو وجود ندارد.';
+}catch(e){loading.innerHTML='<div><h2>بارگیری ناموفق</h2><p>برای بارگیری Three.js اینترنت لازم است.</p><small>فایل را با مرورگر جدید باز کن. خطا: '+String(e).replace(/[<>&]/g,'')+'</small></div>';status.textContent='بارگیری Three.js ناموفق بود'}
+</script></body></html>
